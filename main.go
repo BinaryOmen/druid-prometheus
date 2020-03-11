@@ -15,7 +15,7 @@ func main() {
 	//This section will start the HTTP server and expose
 	//any metrics on the /metrics endpoint.
 
-	go executeCronJob()
+	go execute()
 	time.Sleep(500 * time.Millisecond)
 	http.Handle("/metrics", promhttp.Handler())
 	log.Printf("Beginning to serve on port :8080")
@@ -23,7 +23,7 @@ func main() {
 
 }
 
-func executeCronJob() {
+func execute() {
 	metric := collector.Collector()
 	prometheus.MustRegister(metric)
 }
