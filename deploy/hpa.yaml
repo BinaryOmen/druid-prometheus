@@ -2,8 +2,7 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  namespace: druid
-  name: druid-mm
+  name: middle-manager-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
