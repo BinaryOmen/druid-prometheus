@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      druid: metrics 
+  template:
+    metadata:
+      labels:
+        druid: metrics
+    spec:
+      containers:
+        - name: druid
+          image: singh1234/druid-prometheus:v0.2
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: "DRUID_EP"
+              value: "http://router-druid-cluster-routers-service:8888"
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics
+  labels:
+    druid: metrics 
+spec:
+  type: ClusterIP
+  ports:
+   - port: 8080
+  selector:
+   druid: metrics
