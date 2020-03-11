@@ -11,6 +11,13 @@
 ##### GETTING STARTED
  - This exporter can be ran as a simple deployment in kubernetes. 
  - The deployment files expects a env for the druid endpoint ```DRUID_EP```, this can be an overlord or a router endpoint. 
+ - Build your own docker image.
+
+ ```
+ - docker build -t your_repo/image_name:tag .
+ - docker push image_name
+ ```
+
  ```
 
  ## Deploy exporter
