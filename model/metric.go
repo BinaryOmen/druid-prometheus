@@ -1,5 +1,6 @@
 package models
 
 type Metric []struct {
-	StatusCode string `json:"statusCode"`
+	NameDataSource string `json:"name"`
+	StatusCode     string `json:"statusCode"`
 }

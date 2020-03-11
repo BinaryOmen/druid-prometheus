@@ -6,9 +6,10 @@ import (
 )
 
 func TestHTTPGetMetric(t *testing.T) {
-	a := HTTPGetMetric("http://localhost:8081/druid/indexer/v1/runningTasks")
+	a := HTTPGetMetric("http://localhost:8888/druid/coordinator/v1/metadata/datasources?full")
 
 	t.Logf("%v", len(a))
+	t.Logf("%v", a)
 
 }
 func WordCount(value string) int {
