@@ -1,0 +1,18 @@
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  namespace: druid
+  name: druid-mm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: middle-manager
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+  - type: Pods
+    pods:
+      metricName: druid_pending_tasks
+      targetAverageValue: 2
