@@ -9,6 +9,7 @@
     4. Completed Tasks
 
 ##### GETTING STARTED
+ - To deploy a druid cluster on kuberentes, refer to this awesome operator ```https://github.com/druid-io/druid-operator```.
  - This exporter can be ran as a simple deployment in kubernetes. 
  - The deployment files expects a env for the druid endpoint ```DRUID_EP```, this can be an overlord or a router endpoint. 
  - Build your own docker image.
