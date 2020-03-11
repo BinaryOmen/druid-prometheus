@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	pendingTask        = "/druid/indexer/v1/pendingTasks"
-	runningTask        = "/druid/indexer/v1/runningTasks"
-	waitingTask        = "/druid/indexer/v1/waitingTasks"
-	completedTask      = "/druid/indexer/v1/completeTasks"
-	datasourceCountAll = "/druid/coordinator/v1/metadata/datasources?full"
+	pendingTask   = "/druid/indexer/v1/pendingTasks"
+	runningTask   = "/druid/indexer/v1/runningTasks"
+	waitingTask   = "/druid/indexer/v1/waitingTasks"
+	completedTask = "/druid/indexer/v1/completeTasks"
+	datasourceAll = "/druid/coordinator/v1/metadata/datasources?full"
 )
 
 var (
@@ -105,7 +105,7 @@ func (collector *MetricCollector) Collect(ch chan<- prometheus.Metric) {
 	log.Printf("Number of pending tasks: %v", pendingTasks)
 	ch <- prometheus.MustNewConstMetric(collector.PendingTaskMetric, prometheus.GaugeValue, float64(pendingTasks))
 
-	urlCA := overlords + datasourceCountAll
+	urlCA := overlords + datasourceAll
 	datasourcecountAll := utils.HTTPGetMetric(urlCA)
 	datasourcecountAllMetric := len(datasourcecountAll)
 	log.Printf("Number of all datasource: %v", datasourcecountAllMetric)
