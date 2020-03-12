@@ -8,6 +8,7 @@
     2. Pending Tasks
     3. Waiting Tasks
     4. Completed Tasks
+    5. Succeded Tasks
     5. Count of All DataSources
 
 ##### GETTING STARTED
@@ -35,6 +36,8 @@
 - druid_completed_tasks
 - druid_pending_tasks
 - druid_waiting_tasks
+- druid_success_tasks
+- druid_datasources_count_all
 ```
 
 # Custom Scaling Of Middle Managers
