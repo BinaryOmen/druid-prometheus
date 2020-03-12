@@ -1,7 +1,6 @@
 package collector
 
 import (
-	models "druid-prometheus/model"
 	"druid-prometheus/utils"
 	"log"
 	"os"
@@ -28,7 +27,6 @@ type MetricCollector struct {
 	CompletedTaskMetric      *prometheus.Desc
 	WaitingTaskMetric        *prometheus.Desc
 	PendingTaskMetric        *prometheus.Desc
-	SuccessTaskMetric        *prometheus.Desc
 	DataSourceCountAllMetric *prometheus.Desc
 }
 
@@ -59,12 +57,6 @@ func Collector() *MetricCollector {
 				"tasks": "pending",
 			},
 		),
-		SuccessTaskMetric: prometheus.NewDesc("druid_success_tasks",
-			"number of succeeded tasks",
-			nil, prometheus.Labels{
-				"tasks": "success",
-			},
-		),
 		DataSourceCountAllMetric: prometheus.NewDesc("druid_datasources_count_all",
 			"Returns a list of the names of data sources, regardless of whether there are used segments belonging to those data sources in the cluster or not",
 			nil, prometheus.Labels{
@@ -82,7 +74,6 @@ func (collector *MetricCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.PendingTaskMetric
 	ch <- collector.WaitingTaskMetric
 	ch <- collector.DataSourceCountAllMetric
-	ch <- collector.SuccessTaskMetric
 
 }
 
@@ -102,9 +93,6 @@ func (collector *MetricCollector) Collect(ch chan<- prometheus.Metric) {
 	log.Printf("Number of completed tasks: %v", completedTasks)
 	ch <- prometheus.MustNewConstMetric(collector.CompletedTaskMetric, prometheus.CounterValue, float64(completedTasks))
 
-	successTask := Status(completed)
-	ch <- prometheus.MustNewConstMetric(collector.SuccessTaskMetric, prometheus.CounterValue, float64(successTask))
-
 	urlW := overlords + waitingTask
 	waiting := utils.HTTPGetMetric(urlW)
 	waitingTasks := len(waiting)
@@ -123,20 +111,4 @@ func (collector *MetricCollector) Collect(ch chan<- prometheus.Metric) {
 	log.Printf("Number of all datasource: %v", datasourcecountAllMetric)
 	ch <- prometheus.MustNewConstMetric(collector.DataSourceCountAllMetric, prometheus.CounterValue, float64(datasourcecountAllMetric))
 
-}
-
-func Status(metric models.Metric) (taskCount int) {
-
-	for i := range metric {
-		l := models.Label{
-			StatusCode: metric[i].StatusCode,
-		}
-		if l.StatusCode == "SUCCESS" {
-			succededTasks := len(metric)
-			log.Printf("Number of succeded tasks: %v", succededTasks)
-			return succededTasks
-		}
-
-	}
-	return taskCount
 }

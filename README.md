@@ -36,7 +36,6 @@
 - druid_completed_tasks
 - druid_pending_tasks
 - druid_waiting_tasks
-- druid_success_tasks
 - druid_datasources_count_all
 ```
 

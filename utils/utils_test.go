@@ -9,12 +9,16 @@ import (
 func TestHTTPGetMetric(t *testing.T) {
 	a := HTTPGetMetric("http://localhost:8888/druid/indexer/v1/completeTasks")
 
+	t.Logf("%v", a)
 	for i := range a {
 		v := models.Label{
-			//	NameDataSource: a[i].NameDataSource,
-			StatusCode: a[i].StatusCode,
+			NameDataSource: a[i].NameDataSource,
+			StatusCode:     a[i].StatusCode,
 		}
-		//	t.Logf("%v", v.NameDataSource)
+		if v.StatusCode == "FAILED" {
+			t.Logf("FAILED CODE %s", v.StatusCode)
+		}
+		t.Logf("%v", v.NameDataSource)
 		t.Logf("%v", v.StatusCode)
 	}
 
