@@ -8,8 +8,8 @@
     2. Pending Tasks
     3. Waiting Tasks
     4. Completed Tasks
-    5. Succeded Tasks
     5. Count of All DataSources
+    6. Druid Health 
 
 ##### GETTING STARTED
  - To deploy a druid cluster on kuberentes, refer to this awesome operator ```https://github.com/druid-io/druid-operator```.
