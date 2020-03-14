@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: druid
-          image: singh1234/druid-prometheus:v0.4
+          image: singh1234/prometheus:v0.6
           imagePullPolicy: "IfNotPresent"
           ports:
             - containerPort: 8080

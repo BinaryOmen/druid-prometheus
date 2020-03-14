@@ -39,6 +39,29 @@ func HTTPGetMetric(url string) models.Metric {
 	return generic
 }
 
+func HTTPHealthGet(url string) float64 {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatalf("NewRequest construct error : %d", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Fatalf("GET request error on URL specified : %d", err)
+
+	}
+
+	log.Printf("Response:[%s],Method:[%s]", resp.Status, resp.Request.Method)
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		return 1
+	}
+
+	return 0
+}
+
 func url(overlordsep, path string) string {
 	url := overlordsep + path
 	return url

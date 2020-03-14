@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	druidHealth   = "/status/health"
 	pendingTask   = "/druid/indexer/v1/pendingTasks"
 	runningTask   = "/druid/indexer/v1/runningTasks"
 	waitingTask   = "/druid/indexer/v1/waitingTasks"
@@ -18,44 +19,28 @@ const (
 
 var (
 	// overlords endpoint.
-	overlords = os.Getenv("DRUID_EP")
+	druid_ep = os.Getenv("DRUID_EP")
 )
 
 // metricCollector includes the list of metrics
 type MetricCollector struct {
-	RunningTaskMetric        *prometheus.Desc
-	CompletedTaskMetric      *prometheus.Desc
-	WaitingTaskMetric        *prometheus.Desc
-	PendingTaskMetric        *prometheus.Desc
+	DruidHealthStatus        *prometheus.Desc
+	TaskMetric               *prometheus.Desc
 	DataSourceCountAllMetric *prometheus.Desc
 }
 
 // Collector return the defined metrics with prometheus description
 func Collector() *MetricCollector {
 	return &MetricCollector{
-		RunningTaskMetric: prometheus.NewDesc("druid_running_tasks",
-			"Shows number of running tasks",
+		DruidHealthStatus: prometheus.NewDesc("druid_health_status",
+			"Health of Druid, 1 is healthy 0 is not",
 			nil, prometheus.Labels{
-				"tasks": "running",
+				"druid": "health",
 			},
 		),
-		CompletedTaskMetric: prometheus.NewDesc("druid_completed_tasks",
-			"Shows number of Completed tasks",
-			nil, prometheus.Labels{
-				"tasks": "completed",
-			},
-		),
-		WaitingTaskMetric: prometheus.NewDesc("druid_waiting_tasks",
-			"number of Completed tasks",
-			nil, prometheus.Labels{
-				"tasks": "waiting",
-			},
-		),
-		PendingTaskMetric: prometheus.NewDesc("druid_pending_tasks",
-			"number of Completed tasks",
-			nil, prometheus.Labels{
-				"tasks": "pending",
-			},
+		TaskMetric: prometheus.NewDesc("druid_tasks",
+			"Shows number of Druid tasks",
+			[]string{"tasks"}, nil,
 		),
 		DataSourceCountAllMetric: prometheus.NewDesc("druid_datasources_count_all",
 			"Returns a list of the names of data sources, regardless of whether there are used segments belonging to those data sources in the cluster or not",
@@ -69,10 +54,11 @@ func Collector() *MetricCollector {
 // Describe method shall ingest the metric value passed.
 func (collector *MetricCollector) Describe(ch chan<- *prometheus.Desc) {
 
-	ch <- collector.RunningTaskMetric
-	ch <- collector.CompletedTaskMetric
-	ch <- collector.PendingTaskMetric
-	ch <- collector.WaitingTaskMetric
+	ch <- collector.DruidHealthStatus
+	//	ch <- collector.RunningTaskMetric
+	ch <- collector.TaskMetric
+	//	ch <- collector.PendingTaskMetric
+	//	ch <- collector.WaitingTaskMetric
 	ch <- collector.DataSourceCountAllMetric
 
 }
@@ -80,35 +66,25 @@ func (collector *MetricCollector) Describe(ch chan<- *prometheus.Desc) {
 // Collect ingests
 func (collector *MetricCollector) Collect(ch chan<- prometheus.Metric) {
 
-	urlR := overlords + runningTask
+	urlH := druid_ep + druidHealth
+	Health := utils.HTTPHealthGet(urlH)
+	log.Printf("Druid Health Status: %v", Health)
+	ch <- prometheus.MustNewConstMetric(collector.DruidHealthStatus, prometheus.GaugeValue, Health)
 
-	running := utils.HTTPGetMetric(urlR)
-	runningTasks := len(running)
-	log.Printf("Number of running tasks: %v", runningTasks)
-	ch <- prometheus.MustNewConstMetric(collector.RunningTaskMetric, prometheus.GaugeValue, float64(runningTasks))
+	urls := []string{druid_ep + runningTask, druid_ep + completedTask, druid_ep + pendingTask, druid_ep + waitingTask}
+	runningTask := utils.HTTPGetMetric(urls[0])
+	completedTask := utils.HTTPGetMetric(urls[1])
+	pendingTask := utils.HTTPGetMetric(urls[2])
+	waitingTask := utils.HTTPGetMetric(urls[3])
 
-	urlC := overlords + completedTask
-	completed := utils.HTTPGetMetric(urlC)
-	completedTasks := len(completed)
-	log.Printf("Number of completed tasks: %v", completedTasks)
-	ch <- prometheus.MustNewConstMetric(collector.CompletedTaskMetric, prometheus.CounterValue, float64(completedTasks))
+	ch <- prometheus.MustNewConstMetric(collector.TaskMetric, prometheus.GaugeValue, float64(len(runningTask)), "running")
+	ch <- prometheus.MustNewConstMetric(collector.TaskMetric, prometheus.GaugeValue, float64(len(completedTask)), "completed")
+	ch <- prometheus.MustNewConstMetric(collector.TaskMetric, prometheus.GaugeValue, float64(len(pendingTask)), "pending")
+	ch <- prometheus.MustNewConstMetric(collector.TaskMetric, prometheus.GaugeValue, float64(len(waitingTask)), "waiting")
 
-	urlW := overlords + waitingTask
-	waiting := utils.HTTPGetMetric(urlW)
-	waitingTasks := len(waiting)
-	log.Printf("Number of waiting tasks: %v", waitingTasks)
-	ch <- prometheus.MustNewConstMetric(collector.WaitingTaskMetric, prometheus.GaugeValue, float64(waitingTasks))
-
-	urlP := overlords + pendingTask
-	pending := utils.HTTPGetMetric(urlP)
-	pendingTasks := len(pending)
-	log.Printf("Number of pending tasks: %v", pendingTasks)
-	ch <- prometheus.MustNewConstMetric(collector.PendingTaskMetric, prometheus.GaugeValue, float64(pendingTasks))
-
-	urlCA := overlords + datasourceAll
+	urlCA := druid_ep + datasourceAll
 	datasourcecountAll := utils.HTTPGetMetric(urlCA)
-	datasourcecountAllMetric := len(datasourcecountAll)
-	log.Printf("Number of all datasource: %v", datasourcecountAllMetric)
-	ch <- prometheus.MustNewConstMetric(collector.DataSourceCountAllMetric, prometheus.CounterValue, float64(datasourcecountAllMetric))
+	log.Printf("Number of all datasource: %v", len(datasourcecountAll))
+	ch <- prometheus.MustNewConstMetric(collector.DataSourceCountAllMetric, prometheus.CounterValue, float64(len(datasourcecountAll)))
 
 }
