@@ -31,18 +31,20 @@
  - kubectl create -f prometheus.yaml
  ```
 - Run tasks on druid and check the metrics. Expose prometheus UI ```kubectl port-forward prometheus_pod 9090:9090```
-```
-- druid_running_tasks
-- druid_completed_tasks
-- druid_pending_tasks
-- druid_waiting_tasks
-- druid_datasources_count_all
-```
+
 
 # Custom Scaling Of Middle Managers
 
   - Deploy prometheus custom metrics adapter. Refer to this  ```https://github.com/stefanprodan/k8s-prom-hpa``` to get started.
-  - Deploy the HPA yaml to scale on the basis of pending tasks.
+  - Deploy the HPA yaml to scale on the basis of the following metrics
+  
+  ```
+druid_tasks{instance="metrics.druid.svc.cluster.local:8080",job="druid-metrics",tasks="completed"}	
+druid_tasks{instance="metrics.druid.svc.cluster.local:8080",job="druid-metrics",tasks="pending"}
+druid_tasks{instance="metrics.druid.svc.cluster.local:8080",job="druid-metrics",tasks="running"}
+druid_tasks{instance="metrics.druid.svc.cluster.local:8080",job="druid-metrics",tasks="waiting"}
+
+```
  ```
  ##  Deploy HPA 
  - kubectl create -f deploy/hpa.yaml
