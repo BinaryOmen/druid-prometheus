@@ -52,6 +52,7 @@ druid_tasks{instance="metrics.druid.svc.cluster.local:8080",job="druid-metrics",
  ```
  
  ######  NOTE: This is tested for HPA apiVersion ```autoscaling/v2beta1```. Exporter is still under development.
+ ######  You will need to add a custom post stop container script which does not kill the process of running tasks in MM
 
 
 
